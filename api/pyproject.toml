@@ -222,7 +222,7 @@ vdb = [
     "intersystems-irispython>=5.1.0",
     "tablestore==6.3.7",
     "tcvectordb~=1.6.4",
-    "tidb-vector==0.0.9",
+    "tidb-vector==0.0.15",
     "upstash-vector==0.6.0",
     "volcengine-compat~=1.0.0",
     "weaviate-client==4.17.0",

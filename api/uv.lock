@@ -1760,7 +1760,7 @@ vdb = [
     { name = "qdrant-client", specifier = "==1.9.0" },
     { name = "tablestore", specifier = "==6.3.7" },
     { name = "tcvectordb", specifier = "~=1.6.4" },
-    { name = "tidb-vector", specifier = "==0.0.9" },
+    { name = "tidb-vector", specifier = "==0.0.15" },
     { name = "upstash-vector", specifier = "==0.6.0" },
     { name = "volcengine-compat", specifier = "~=1.0.0" },
     { name = "weaviate-client", specifier = "==4.17.0" },
@@ -6095,14 +6095,14 @@ wheels = [
 
 [[package]]
 name = "tidb-vector"
-version = "0.0.9"
+version = "0.0.15"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1a/98/ab324fdfbbf064186ca621e21aa3871ddf886ecb78358a9864509241e802/tidb_vector-0.0.9.tar.gz", hash = "sha256:e10680872532808e1bcffa7a92dd2b05bb65d63982f833edb3c6cd590dec7709", size = 16948, upload-time = "2024-05-08T07:54:36.955Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b1/55/6247b3b8dd0c0ec05a7b0dd7d4f016d03337d6f089db9cc221a31de1308c/tidb_vector-0.0.15.tar.gz", hash = "sha256:dfd16b31b06f025737f5c7432a08e04265dde8a7c9c67d037e6e694c8125f6f5", size = 20702, upload-time = "2025-07-15T09:48:07.423Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5d/bb/0f3b7b4d31537e90f4dd01f50fa58daef48807c789c1c1bdd610204ff103/tidb_vector-0.0.9-py3-none-any.whl", hash = "sha256:db060ee1c981326d3882d0810e0b8b57811f278668f9381168997b360c4296c2", size = 17026, upload-time = "2024-05-08T07:54:34.849Z" },
+    { url = "https://files.pythonhosted.org/packages/24/27/5a4aeeae058f75c1925646ff82215551903688ec33acc64ca46135eac631/tidb_vector-0.0.15-py3-none-any.whl", hash = "sha256:2bc7d02f5508ba153c8d67d049ab1e661c850e09e3a29286dc8b19945e512ad8", size = 21924, upload-time = "2025-07-15T09:48:05.834Z" },
 ]
 
 [[package]]

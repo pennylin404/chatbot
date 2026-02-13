@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain B - Chatbot Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        .header {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .info-box {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #fff;
+        }
+        code {
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .domain-badge {
+            display: inline-block;
+            background: #4ecdc4;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌐 Domain B 測試頁面</h1>
+        <div class="domain-badge">模擬域名: https://domain-b.example.com</div>
+    </div>
+
+    <div class="info-box">
+        <h3>📋 當前配置</h3>
+        <p><strong>Origin:</strong> <code id="current-origin">載入中...</code></p>
+        <p><strong>User ID:</strong> <code>test-user-123</code></p>
+        <p><strong>Token:</strong> <code>EzLkESGW0zOk0bwj</code></p>
+    </div>
+
+    <div class="info-box">
+        <h3>✅ 測試步驟</h3>
+        <ol>
+            <li>在此頁面開啟 chatbot 並發送一則訊息</li>
+            <li>打開 <a href="/test-domain-a.html" style="color: #ffd93d; font-weight: bold;">Domain A 測試頁面</a></li>
+            <li>在 Domain A 頁面也發送一則訊息</li>
+            <li>檢查後端日誌，確認兩個域名的 <code>origin</code> 參數不同</li>
+        </ol>
+    </div>
+
+    <div class="info-box">
+        <h3>🔍 預期結果</h3>
+        <p>在 Domain B 發送的訊息，後端應該收到：</p>
+        <code>origin: "https://domain-b.example.com"</code>
+    </div>
+
+    <script>
+        // 配置 Chatbot - Domain B
+        window.difyChatbotConfig = {
+            token: 'EzLkESGW0zOk0bwj',
+            baseUrl: 'http://localhost:3000',
+            inputs: {
+                origin: 'https://domain-b.example.com'  // Domain B 的 origin
+            }
+        };
+
+        // 顯示當前配置
+        document.getElementById('current-origin').textContent = window.difyChatbotConfig.inputs.origin;
+
+        // 監聽 iframe ready 事件
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'dify-chatbot-iframe-ready') {
+                console.log('✅ Chatbot iframe 已就緒');
+                console.log('📤 自動發送 origin:', window.difyChatbotConfig.inputs.origin);
+            }
+        });
+    </script>
+
+    <!-- 載入本地的 embed.min.js -->
+    <script src="http://localhost:3000/embed.min.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dify Chatbot Origin Update Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 50px auto;
+        padding: 20px;
+      }
+      .control-panel {
+        background: #f5f5f5;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+      button {
+        background: #1c64f2;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      button:hover {
+        background: #1a56db;
+      }
+      .info {
+        background: #e7f3ff;
+        padding: 15px;
+        border-left: 4px solid #1c64f2;
+        margin: 10px 0;
+      }
+      input {
+        padding: 8px;
+        width: 300px;
+        margin: 5px;
+      }
+      #log {
+        background: #000;
+        color: #0f0;
+        padding: 15px;
+        border-radius: 4px;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        max-height: 300px;
+        overflow-y: auto;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🧪 Dify Chatbot Origin Update Test</h1>
+
+    <div class="info">
+      <strong>測試目的：</strong>驗證 chatbot 能否透過
+      <code>postMessage</code> 動態更新 <code>origin</code> 參數。
+    </div>
+
+    <div class="control-panel">
+      <h3>控制面板</h3>
+
+      <div>
+        <label>當前 Origin：</label>
+        <input type="text" id="originInput" value="https://example.com" />
+        <button onclick="updateOrigin()">📤 更新 Origin</button>
+      </div>
+
+      <div style="margin-top: 15px">
+        <button onclick="resetChat()">🔄 重置對話</button>
+        <button onclick="checkConfig()">🔍 檢查當前配置</button>
+        <button onclick="clearLog()">🗑️ 清除日誌</button>
+      </div>
+    </div>
+
+    <div class="info">
+      <strong>操作說明：</strong>
+      <ol>
+        <li>
+          修改上方的 Origin 輸入框（例如改成 <code>https://test.com</code>）
+        </li>
+        <li>點擊「更新 Origin」按鈕</li>
+        <li>打開瀏覽器 Console，檢查是否收到 <code>postMessage</code></li>
+        <li>
+          在 chatbot 中發送訊息，檢查後端日誌中的 <code>origin</code> 是否已更新
+        </li>
+      </ol>
+    </div>
+
+    <div id="log">
+      <div>[系統] 測試頁面已載入</div>
+      <div>[提示] 請先在 window.difyChatbotConfig 中配置您的 chatbot token</div>
+    </div>
+
+    <!-- Dify Chatbot Script -->
+    <script>
+      // 配置您的 chatbot
+      window.difyChatbotConfig = {
+        token: "EzLkESGW0zOk0bwj", // 請替換成您的 token
+        baseUrl: "http://localhost:3000", // 指向您本地的 Dify 服務
+        inputs: {
+          origin: "https://initial-domain.com", // 初始 origin
+        },
+      };
+
+      function log(message, type = "info") {
+        const logDiv = document.getElementById("log");
+        const timestamp = new Date().toLocaleTimeString();
+        const color =
+          type === "error"
+            ? "#ff6b6b"
+            : type === "success"
+              ? "#51cf66"
+              : "#0f0";
+        logDiv.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+      }
+
+      function updateOrigin() {
+        const newOrigin = document.getElementById("originInput").value;
+
+        // 更新 window.difyChatbotConfig
+        window.difyChatbotConfig.inputs.origin = newOrigin;
+        log(
+          `✅ 已更新 window.difyChatbotConfig.inputs.origin = "${newOrigin}"`,
+          "success",
+        );
+
+        // 發送 postMessage 給 iframe
+        const iframe = document.getElementById("dify-chatbot-bubble-window");
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage(
+            {
+              type: "dify-chatbot-update-inputs",
+              payload: {
+                inputs: { origin: newOrigin },
+              },
+            },
+            "*",
+          );
+          log(`📤 已發送 postMessage 到 chatbot iframe`, "success");
+        } else {
+          log(`❌ 找不到 chatbot iframe，請確認 chatbot 已載入`, "error");
+        }
+      }
+
+      function resetChat() {
+        const iframe = document.getElementById("dify-chatbot-bubble-window");
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage(
+            {
+              type: "dify-chatbot-reset",
+            },
+            "*",
+          );
+          log(`🔄 已發送重置指令`, "success");
+        } else {
+          log(`❌ 找不到 chatbot iframe`, "error");
+        }
+      }
+
+      function checkConfig() {
+        log(`📋 當前配置：`, "info");
+        log(`   - token: ${window.difyChatbotConfig.token}`, "info");
+        log(`   - baseUrl: ${window.difyChatbotConfig.baseUrl}`, "info");
+        log(`   - origin: ${window.difyChatbotConfig.inputs.origin}`, "info");
+      }
+
+      function clearLog() {
+        document.getElementById("log").innerHTML =
+          "<div>[系統] 日誌已清除</div>";
+      }
+
+      // 監聽來自 iframe 的訊息
+      window.addEventListener("message", (event) => {
+        if (event.data.type === "dify-chatbot-iframe-ready") {
+          log(`✅ Chatbot iframe 已就緒`, "success");
+        }
+      });
+
+      // 頁面載入時顯示初始配置
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          checkConfig();
+        }, 1000);
+      });
+    </script>
+
+    <!-- 載入您本地的 embed.min.js -->
+    <script src="http://localhost:3000/embed.min.js" defer></script>
+  </body>
+</html>

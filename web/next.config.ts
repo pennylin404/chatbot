@@ -59,7 +59,22 @@ const nextConfig: NextConfig = {
       },
     ]
   },
-  output: 'standalone',
+  async rewrites() {
+    return [
+      {
+        source: '/console/api/:path*',
+        destination: 'https://udify.app/console/api/:path*',
+      },
+      {
+        source: '/api/:path*',
+        destination: 'https://udify.app/api/:path*',
+      },
+      {
+        source: '/v1/:path*',
+        destination: 'https://udify.app/v1/:path*',
+      },
+    ]
+  },
   compiler: {
     removeConsole: isDev ? false : { exclude: ['warn', 'error'] },
   },

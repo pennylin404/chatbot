@@ -51,12 +51,21 @@ export function useSetupStatusQuery() {
 const GlobalPublicStoreProvider: FC<PropsWithChildren> = ({
   children,
 }) => {
+  // Skip backend checks if in dev mode and flag is set
+  const skipBackendCheck = typeof window !== 'undefined' && window.location.search.includes('skip-backend=true')
+
   // Fetch systemFeatures and setupStatus in parallel to reduce waterfall.
   // setupStatus is prefetched here and cached in localStorage for AppInitializer.
-  const { isPending } = useSystemFeaturesQuery()
+  const { isPending, isError } = useSystemFeaturesQuery()
 
   // Prefetch setupStatus for AppInitializer (result not needed here)
   useSetupStatusQuery()
+
+  // Allow loading even if backend fails when skip-backend flag is set
+  if (skipBackendCheck && isError) {
+    console.warn('⚠️ Backend check skipped for local testing')
+    return <>{children}</>
+  }
 
   if (isPending)
     return <div className="flex h-screen w-screen items-center justify-center"><Loading /></div>

@@ -364,10 +364,15 @@ export const useEmbeddedChatbot = (appSourceType: AppSourceType, tryAppId?: stri
   }, [conversationList, currentConversationId, pinnedConversationList])
 
   const currentConversationLatestInputs = useMemo(() => {
-    if (!currentConversationId || !appChatListData?.data.length)
-      return newConversationInputsRef.current || {}
-    return appChatListData.data.slice().pop().inputs || {}
-  }, [appChatListData, currentConversationId])
+    const historyInputs = (currentConversationId && appChatListData?.data.length)
+      ? (appChatListData.data.slice().pop().inputs || {})
+      : {}
+
+    return {
+      ...historyInputs,
+      ...initInputs, // Priority to URL/Config inputs
+    }
+  }, [appChatListData, currentConversationId, initInputs])
   const [currentConversationInputs, setCurrentConversationInputs] = useState<Record<string, any>>(currentConversationLatestInputs || {})
   useEffect(() => {
     if (currentConversationItem && !isTryApp)
@@ -454,6 +459,27 @@ export const useEmbeddedChatbot = (appSourceType: AppSourceType, tryAppId?: stri
     await updateFeedback({ url: `/messages/${messageId}/feedbacks`, body: { rating: feedback.rating, content: feedback.content } }, appSourceType, appId)
     notify({ type: 'success', message: t('api.success', { ns: 'common' }) })
   }, [appSourceType, appId, t, notify])
+
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      if (event.data.type === 'dify-chatbot-reset')
+        handleNewConversation()
+
+      if (event.data.type === 'dify-chatbot-update-inputs') {
+        const newInputs = event.data.payload.inputs
+        setInitInputs(prev => ({
+          ...prev,
+          ...newInputs,
+        }))
+        handleNewConversationInputsChange({
+          ...newConversationInputsRef.current,
+          ...newInputs,
+        })
+      }
+    }
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [handleNewConversation, handleNewConversationInputsChange])
 
   return {
     appSourceType,

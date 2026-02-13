@@ -32,6 +32,12 @@ export const AppInitializer = ({
   )
 
   const isSetupFinished = useCallback(async () => {
+    // Skip backend check if flag is set
+    if (searchParams.get('skip-backend') === 'true') {
+      console.warn('⚠️ Setup check skipped for local testing')
+      return true
+    }
+
     try {
       const setUpStatus = await fetchSetupStatusWithCache()
       return setUpStatus.step === 'finished'
@@ -40,7 +46,7 @@ export const AppInitializer = ({
       console.error(error)
       return false
     }
-  }, [])
+  }, [searchParams])
 
   useEffect(() => {
     (async () => {

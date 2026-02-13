@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Origin 同步驗證 - 簡化版</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .log-container {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 500px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid transparent;
+        }
+        .log-success { border-left-color: #4ec9b0; color: #4ec9b0; }
+        .log-info { border-left-color: #569cd6; color: #569cd6; }
+        .log-warning { border-left-color: #dcdcaa; color: #dcdcaa; }
+        .log-error { border-left-color: #f48771; color: #f48771; }
+        .config-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        code {
+            background: #e8e8e8;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Origin 自動同步驗證</h1>
+    
+    <div class="config-box">
+        <h3>📋 當前配置</h3>
+        <p><strong>Origin:</strong> <code id="current-origin">載入中...</code></p>
+        <p><strong>Token:</strong> <code>EzLkESGW0zOk0bwj</code></p>
+        <p><strong>BaseURL:</strong> <code>http://localhost:3000</code></p>
+    </div>
+
+    <div class="config-box">
+        <h3>📊 執行日誌</h3>
+        <div class="log-container" id="logContainer"></div>
+    </div>
+
+    <script>
+        // 日誌函數
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(`[${type.toUpperCase()}]`, message);
+        }
+
+        // 配置 Chatbot
+        window.difyChatbotConfig = {
+            token: 'EzLkESGW0zOk0bwj',
+            baseUrl: 'http://localhost:3000',
+            inputs: {
+                origin: 'https://domain-a.example.com'
+            }
+        };
+
+        log('✅ window.difyChatbotConfig 已設定', 'success');
+        log(`   Origin: ${window.difyChatbotConfig.inputs.origin}`, 'info');
+        document.getElementById('current-origin').textContent = window.difyChatbotConfig.inputs.origin;
+
+        // 監聽所有 message 事件
+        window.addEventListener('message', (event) => {
+            log(`📥 收到 message 事件`, 'info');
+            log(`   Type: ${event.data.type}`, 'info');
+            log(`   Origin: ${event.origin}`, 'info');
+
+            if (event.data.type === 'dify-chatbot-iframe-ready') {
+                log('🎉 Chatbot iframe 已就緒！', 'success');
+                log('   這表示 embed.js 成功載入並執行', 'success');
+            }
+
+            if (event.data.type === 'dify-chatbot-update-inputs') {
+                log('🔄 收到 update-inputs 訊息', 'success');
+                log(`   新的 origin: ${event.data.payload?.inputs?.origin}`, 'success');
+                log('   ✅ 自動同步成功！', 'success');
+            }
+
+            if (event.data.type === 'dify-chatbot-config') {
+                log('⚙️ 收到 config 訊息', 'info');
+            }
+        });
+
+        // 檢查 embed.js 是否載入
+        window.addEventListener('load', () => {
+            log('📄 頁面載入完成', 'info');
+            
+            setTimeout(() => {
+                const embedScript = document.querySelector('script[src*="embed.min.js"]');
+                if (embedScript) {
+                    log('✅ embed.min.js script 標籤已找到', 'success');
+                } else {
+                    log('❌ 找不到 embed.min.js script 標籤', 'error');
+                }
+
+                const chatbotButton = document.getElementById('dify-chatbot-bubble-button');
+                if (chatbotButton) {
+                    log('✅ Chatbot 按鈕已建立', 'success');
+                } else {
+                    log('⚠️ Chatbot 按鈕尚未建立（可能還在載入中）', 'warning');
+                }
+
+                const chatbotIframe = document.getElementById('dify-chatbot-bubble-window');
+                if (chatbotIframe) {
+                    log('✅ Chatbot iframe 已建立', 'success');
+                } else {
+                    log('⚠️ Chatbot iframe 尚未建立', 'warning');
+                }
+            }, 2000);
+        });
+
+        // 檢測 script 載入錯誤
+        window.addEventListener('error', (event) => {
+            if (event.target.tagName === 'SCRIPT') {
+                log(`❌ Script 載入失敗: ${event.target.src}`, 'error');
+            }
+        }, true);
+
+        log('🚀 驗證頁面初始化完成', 'info');
+        log('   等待 embed.min.js 載入...', 'info');
+    </script>
+
+    <!-- 載入 embed.min.js -->
+    <script src="http://localhost:3000/embed.min.js" defer></script>
+</body>
+</html>

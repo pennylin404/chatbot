@@ -225,6 +225,16 @@
           },
           targetOrigin
         );
+        // Automatically sync inputs from config when iframe is ready
+        targetIframe.contentWindow?.postMessage(
+          {
+            type: 'dify-chatbot-update-inputs',
+            payload: {
+              inputs: config.inputs || {},
+            },
+          },
+          targetOrigin
+        );
       }
 
       if (event.data.type === 'dify-chatbot-expand-change') {
@@ -452,4 +462,46 @@
   } else {
     document.body.onload = embedChatbot;
   }
+
+  // Expose public API for dynamic updates
+  window.difyChatbot = {
+    updateInputs: (newInputs, options = {}) => {
+      const targetIframe = document.getElementById(iframeId);
+      if (!targetIframe || !targetIframe.contentWindow) {
+        console.error("Chatbot iframe not found or not ready.");
+        return;
+      }
+
+      // Update the local config object
+      if (window[configKey]) {
+        window[configKey].inputs = {
+          ...(window[configKey].inputs || {}),
+          ...newInputs
+        };
+      }
+
+      const baseUrl = window[configKey]?.baseUrl || `https://${window[configKey]?.isDev ? "dev." : ""}udify.app`;
+      const targetOrigin = new URL(baseUrl).origin;
+
+      // Notify the chatbot inside the iframe
+      targetIframe.contentWindow.postMessage(
+        {
+          type: 'dify-chatbot-update-inputs',
+          payload: {
+            inputs: newInputs,
+          },
+        },
+        targetOrigin
+      );
+
+      if (options.reset) {
+        targetIframe.contentWindow.postMessage(
+          {
+            type: 'dify-chatbot-reset',
+          },
+          targetOrigin
+        );
+      }
+    }
+  };
 })();
